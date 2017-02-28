@@ -1,1 +1,8 @@
-{"password": "", "smtpServer": "", "username": "", "email": "", "targetMail": ""}
+{
+    "email": "you@example.com",
+    "smtpServer": "smtp.example.com",
+    "username": "you@example.com",
+    "password": "hunter2",
+    "targetMail": "her@example.com",
+    "delay":  600
+}
