@@ -1,8 +1,14 @@
 {
+    "sendEmail": "True",
+    "sendFtp": "True",
     "email": "you@example.com",
     "smtpServer": "smtp.example.com",
-    "username": "you@example.com",
-    "password": "hunter2",
-    "targetMail": "her@example.com",
-    "delay":  600
+    "emailUsername": "you@example.com",
+    "emailPassword": "hunter2",
+    "targetMail": "they@example.com",
+    "ftpServer": "example.com",
+    "ftpUsername": "you",
+    "ftpPassword": "hunter2",
+    "ftpDirectory": "upload",
+    "delay": 600
 }
