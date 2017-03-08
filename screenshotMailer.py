@@ -1,13 +1,11 @@
-import datetime.now
+import datetime
 import smtplib
 import ftplib
 import json
 import sys
 import io
-
-
-
 import pyscreenshot as ImageGrab
+from PIL import Image
 from time import sleep
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -55,15 +53,17 @@ def main(argv):
 
     # Main loop
     while True:
-        print(('Sending screenshot to: '
-           +config['targetMail']
-           +'. Next screenshot in '
+        print(('Grabbing screenshot. Next screenshot in '
            +str(config['delay'])
            +' seconds'))
 
-        if(config['sendEmail']):
+        if(config['sendEmail'] == 'True'):
+            print(('Sending screenshot to: '
+               +config['targetMail']))
             sendMail(getScreenshot())
-        if(config['sendFtp']):
+        if(config['sendFtp'] == 'True'):
+            print(('Sending per FTP to: '
+               +config['ftpServer']))
             sendFtp(getScreenshot())
         sleep(config['delay'])
 
@@ -71,13 +71,16 @@ def getScreenshot():
     imageBuffer = io.BytesIO()
     image = ImageGrab.grab()
     image.save(imageBuffer, format="PNG")
-    imageValue = imageBuffer.getvalue()
-    imageBuffer.close()
+    imageValue = imageBuffer
     return imageValue
 
-def sendPerFTP(imgBuffer):
-    session = ftplib.FTP(config['ftpServer'],config['ftpUsername'],config['ftpPassword'])
-    session.storbinary('STOR screenshot_'+datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), imgBuffer)
+def sendFtp(imgBuffer):
+    session = ftplib.FTP(config['ftpServer'])
+    session.login(config['ftpUsername'], config['ftpPassword'])
+    session.cwd(config['ftpDirectory'])
+    imageName = 'screenshot_'+datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")+'.png'
+    imgBuffer.seek(0)
+    session.storbinary('STOR '+imageName, imgBuffer)
     session.quit()
 
 def sendMail(imgBuffer):
@@ -89,7 +92,7 @@ def sendMail(imgBuffer):
 
     text = MIMEText("Screenshot done")
     message.attach(text)
-    image = MIMEImage(imgBuffer, name='screenshot.png')
+    image = MIMEImage(imgBuffer.getvalue(), name='screenshot.png')
     message.attach(image)
 
     server.login(config['emailUsername'], config['emailPassword'])

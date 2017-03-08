@@ -1,6 +1,6 @@
 # Screenshot Mailer
 
-A small tool to set up automatic screenshots that are mailed to a specified mail adress
+A small tool to set up automatic screenshots that are mailed to a specified mail address and/or FTP server
 
 ## Config
 
