@@ -71,8 +71,7 @@ def getScreenshot():
     imageBuffer = io.BytesIO()
     image = ImageGrab.grab()
     image.save(imageBuffer, format="PNG")
-    imageValue = imageBuffer
-    return imageValue
+    return imageBuffer
 
 def sendFtp(imgBuffer):
     session = ftplib.FTP(config['ftpServer'])
